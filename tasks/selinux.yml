@@ -5,6 +5,9 @@
     state: yes
     persistent: yes
   when: "pdns_mysql_databases_credentials | length > 0"
+  tags:
+    - selinux
+    - config
 
 - name: allow pdns to bind to udp high ports
   seport:
@@ -12,3 +15,6 @@
     proto: udp
     setype: dns_port_t
     state: present
+  tags:
+    - selinux
+    - config

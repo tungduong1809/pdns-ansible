@@ -4,6 +4,9 @@
   package:
     name: "{{ pdns_mysql_packages }}"
     state: present
+  tags:
+    - db
+    - mysql
 
 - name: Create the PowerDNS MySQL databases
   mysql_db:
@@ -16,6 +19,9 @@
   when: "item.key.split(':')[0] == 'gmysql'"
   no_log: True
   with_dict: "{{ pdns_backends | combine(pdns_mysql_databases_credentials, recursive=True) }}"
+  tags:
+    - db
+    - mysql
 
 - name: Grant PowerDNS access to the MySQL databases
   mysql_user:
@@ -33,6 +39,9 @@
     - "{{ pdns_backends | combine(pdns_mysql_databases_credentials, recursive=True) }}"
     - priv_host
     - skip_missing: yes
+  tags:
+    - db
+    - mysql
 
 - name: Check if the MySQL databases are empty
   command: >
@@ -44,6 +53,9 @@
   register: _pdns_check_mysql_db
   no_log: True
   changed_when: False
+  tags:
+    - db
+    - mysql
 
 - name: Determine location of the SQL file
   shell:
@@ -59,10 +71,16 @@
   changed_when: false
   register: pdns_mysql_schema_file_detected
   when: pdns_mysql_schema_file | length == 0
+  tags:
+    - db
+    - mysql
 
 - name: Set the schema file variable
   set_fact:
     pdns_mysql_schema_file_to_use: "{% if pdns_mysql_schema_file | length == 0 %}{{ pdns_mysql_schema_file_detected.stdout }}{% else %}{{ pdns_mysql_schema_file }}{% endif %}"
+  tags:
+    - db
+    - mysql
 
 - name: Import the PowerDNS MySQL schema
   mysql_db:
@@ -76,3 +94,6 @@
   no_log: True
   when: "item['item']['key'].split(':')[0] == 'gmysql' and item['stdout'] == '0'"
   with_items: "{{ _pdns_check_mysql_db['results'] }}"
+  tags:
+    - db
+    - mysql

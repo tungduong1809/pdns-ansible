@@ -13,17 +13,23 @@
     when: ansible_os_family == 'Debian'
 
   when: "pdns_package_version | length > 0"
+  tags: 
+    - install
 
 - name: Install PowerDNS
   package:
     name: "{{ pdns_package_name }}{{ _pdns_package_version | default('') }}"
     state: present
+  tags: 
+    - install
 
 - name: Install PowerDNS debug symbols
   package:
     name: "{{ pdns_debug_symbols_package_name }}{{ _pdns_package_version | default('') }}"
     state: present
   when: pdns_install_debug_symbols_package
+  tags: 
+    - install
 
 - name: Install PowerDNS backends
   package:
@@ -32,3 +38,5 @@
   no_log: True
   when: pdns_backends_packages[item.key.split(':')[0]] is defined
   with_dict: "{{ pdns_backends }}"
+  tags: 
+    - install

@@ -5,12 +5,18 @@
     name: sqlite
     state: present
   when: ansible_os_family == 'RedHat'
+  tags:
+    - db
+    - sqlite
 
 - name: Install the SQLite dependencies on Debian
   package:
     name: sqlite3
     state: present
   when: ansible_os_family == 'Debian'
+  tags:
+    - db
+    - sqlite
 
 - name: Ensure that the directories containing the PowerDNS SQLite databases exist
   file:
@@ -20,6 +26,9 @@
     state: directory
     mode: 0750
   with_items: "{{ pdns_sqlite_databases_locations }}"
+  tags:
+    - db
+    - sqlite
 
 - name: Determine location of the SQL file
   shell:
@@ -35,16 +44,25 @@
   changed_when: false
   register: pdns_sqlite_schema_file_detected
   when: pdns_sqlite_schema_file | length == 0
+  tags:
+    - db
+    - sqlite
 
 - name: Set the schema file variable
   set_fact:
     pdns_sqlite_schema_file_to_use: "{% if pdns_sqlite_schema_file | length == 0 %}{{ pdns_sqlite_schema_file_detected.stdout }}{% else %}{{ pdns_sqlite_schema_file }}{% endif %}"
+  tags:
+    - db
+    - sqlite
 
 - name: Create the PowerDNS SQLite databases
   shell: "sqlite3 {{ item }} < {{ pdns_sqlite_schema_file_to_use }}"
   args:
     creates: "{{ item }}"
   with_items: "{{ pdns_sqlite_databases_locations }}"
+  tags:
+    - db
+    - sqlite
 
 - name: Check the PowerDNS SQLite databases permissions
   file:
@@ -54,3 +72,6 @@
     mode: 0640
     state: file
   with_items: "{{ pdns_sqlite_databases_locations }}"
+  tags:
+  - db
+  - sqlite

@@ -6,7 +6,17 @@
   register: _pdns_version
   check_mode: no
   changed_when: False
+  tags:
+    - db
+    - mysql
+    - sqlite
+    - config
 
 - name: Export the running PowerDNS instance version to a variable
   set_fact:
     _pdns_running_version: "{{ _pdns_version['stdout'] | regex_replace('-[.\\d\\w]+$', '') }}"
+  tags:
+    - db
+    - mysql
+    - sqlite
+    - config

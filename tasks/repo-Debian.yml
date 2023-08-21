@@ -4,6 +4,9 @@
   package:
     name: gnupg
     state: present
+  tags:
+  - install
+  - repository
 
 - name: Import the PowerDNS APT Repository key from URL
   apt_key:
@@ -12,6 +15,9 @@
     state: present
   when: pdns_install_repo['gpg_key'] is regex("^[a-z]{3,}://")
   register: _pdns_apt_key
+  tags:
+    - install
+    - repository
 
 - name: Import the PowerDNS APT Repository key from File
   apt_key:
@@ -20,6 +26,9 @@
     state: present
   when: not pdns_install_repo['gpg_key'] is regex("^[a-z]{3,}://")
   register: _pdns_apt_key
+  tags:
+    - install
+    - repository
 
 - name: Add the PowerDNS APT Repository
   apt_repository:
@@ -27,11 +36,17 @@
     repo: "{{ pdns_install_repo['apt_repo'] }}"
     state: present
   register: _pdns_apt_repo
+  tags:
+    - install
+    - repository
 
 - name: Update the APT cache
   apt:
     update_cache: yes
   when: "_pdns_apt_key.changed or _pdns_apt_repo.changed"
+  tags:
+    - install
+    - repository
 
 - name: Pin the PowerDNS APT Repository
   template:
@@ -40,3 +55,6 @@
     owner: root
     group: root
     mode: 0644
+  tags:
+    - install
+    - repository
